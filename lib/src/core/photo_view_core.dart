@@ -1,6 +1,12 @@
 import 'package:flutter/widgets.dart';
 import 'package:photo_view/photo_view.dart'
-    show PhotoViewHeroAttributes, PhotoViewImageScaleEndCallback, PhotoViewImageTapDownCallback, PhotoViewImageTapUpCallback, PhotoViewScaleState, ScaleStateCycle;
+    show
+        PhotoViewHeroAttributes,
+        PhotoViewImageScaleEndCallback,
+        PhotoViewImageTapDownCallback,
+        PhotoViewImageTapUpCallback,
+        PhotoViewScaleState,
+        ScaleStateCycle;
 import 'package:photo_view/src/controller/photo_view_controller.dart';
 import 'package:photo_view/src/controller/photo_view_controller_delegate.dart';
 import 'package:photo_view/src/controller/photo_view_scalestate_controller.dart';
@@ -130,8 +136,8 @@ class PhotoViewCoreState extends State<PhotoViewCore>
 
   late ScaleBoundaries cachedScaleBoundaries = widget.scaleBoundaries;
 
-  late final Size imageSize;
-  late final double imageScale;
+  late Size imageSize;
+  late double imageScale;
 
   void handleScaleAnimation() {
     scale = _scaleAnimation!.value;
@@ -155,31 +161,33 @@ class PhotoViewCoreState extends State<PhotoViewCore>
   }
 
   void onScaleUpdate(ScaleUpdateDetails details) {
-    if(stateChanged){
+    if (stateChanged) {
       _scaleBefore = scale;
       stateChanged = false;
     }
-    if(widget.onScaleUpdate?.call() == true){
+    if (widget.onScaleUpdate?.call() == true) {
       return;
     }
     double newScale = _scaleBefore! * details.scale;
     Offset delta = details.focalPoint - _normalizedPosition!;
 
-    if (widget.strictScale && (newScale > widget.scaleBoundaries.maxScale ||
-        newScale < widget.scaleBoundaries.minScale)) {
-      if(newScale > widget.scaleBoundaries.maxScale){
+    if (widget.strictScale &&
+        (newScale > widget.scaleBoundaries.maxScale ||
+            newScale < widget.scaleBoundaries.minScale)) {
+      if (newScale > widget.scaleBoundaries.maxScale) {
         newScale = widget.scaleBoundaries.maxScale;
-      }else if(newScale < widget.scaleBoundaries.minScale){
+      } else if (newScale < widget.scaleBoundaries.minScale) {
         newScale = widget.scaleBoundaries.minScale;
       }
-      if(newScale == scale){
+      if (newScale == scale) {
         return;
       }
     }
 
-    if(details.pointerCount == 1 && newScale != scale){
+    if (details.pointerCount == 1 && newScale != scale) {
       final screenSize = MediaQuery.of(context).size;
-      delta = Offset(screenSize.width/2 - _normalizedPosition!.dx, screenSize.height/2 - _normalizedPosition!.dy);
+      delta = Offset(screenSize.width / 2 - _normalizedPosition!.dx,
+          screenSize.height / 2 - _normalizedPosition!.dy);
     }
 
     updateScaleStateFromNewScale(newScale);
@@ -195,16 +203,16 @@ class PhotoViewCoreState extends State<PhotoViewCore>
     );
   }
 
-  void onScaleEnd(ScaleEndDetails details) async{
-    if(stateChanged){
+  void onScaleEnd(ScaleEndDetails details) async {
+    if (stateChanged) {
       await Future.delayed(const Duration(milliseconds: 200));
     }
     final double _scale = scale;
     final double maxScale = scaleBoundaries.maxScale;
     final double minScale = scaleBoundaries.minScale;
 
-    if(widget.onScaleEnd?.call(context, details, controller.value) == true){
-     return;
+    if (widget.onScaleEnd?.call(context, details, controller.value) == true) {
+      return;
     }
     final Offset _position = controller.position;
 
@@ -251,14 +259,12 @@ class PhotoViewCoreState extends State<PhotoViewCore>
     nextScaleState();
   }
 
-  Future<void> animateScale(double from, double to) async{
+  Future<void> animateScale(double from, double to) async {
     _scaleAnimation = Tween<double>(
       begin: from,
       end: to,
     ).animate(_scaleAnimationController);
-    await (_scaleAnimationController
-      ..value = 0.0)
-      .fling(velocity: 0.4);
+    await (_scaleAnimationController..value = 0.0).fling(velocity: 0.4);
   }
 
   void animatePosition(Offset from, Offset to) {
@@ -344,20 +350,21 @@ class PhotoViewCoreState extends State<PhotoViewCore>
 
     controller.onDoubleClick = nextScaleState;
     controller.animatePosition = animatePosition;
-    controller.updateState = (state){
-      if(state != null) {
+    controller.updateState = (state) {
+      if (state != null) {
         scaleStateController.scaleState = state;
       }
       stateChanged = true;
     };
-    controller.animateScale = (value, [newPosition]){
-      if(position != clampPosition(scale: value, position: newPosition)) {
-        animatePosition(position, clampPosition(scale: value, position: newPosition));
+    controller.animateScale = (value, [newPosition]) {
+      if (position != clampPosition(scale: value, position: newPosition)) {
+        animatePosition(
+            position, clampPosition(scale: value, position: newPosition));
       }
       animateScale(scale, value);
     };
     controller.getInitialScale = () => initialScale;
-    if(controller is PhotoViewController){
+    if (controller is PhotoViewController) {
       (controller as PhotoViewController).getScaleWithFit = getScaleWithFit;
     }
 
@@ -439,16 +446,20 @@ class PhotoViewCoreState extends State<PhotoViewCore>
         : _buildChild();
   }
 
-  double? getScaleWithFit(BoxFit fit){
+  double? getScaleWithFit(BoxFit fit) {
     final screenSize = MediaQuery.of(context).size;
     final size = imageSize;
-    if(fit == BoxFit.fitHeight && (screenSize.width / screenSize.height < size.width / size.height)){
-      var newScale = screenSize.height / (size.height / size.width * screenSize.width);
+    if (fit == BoxFit.fitHeight &&
+        (screenSize.width / screenSize.height < size.width / size.height)) {
+      var newScale =
+          screenSize.height / (size.height / size.width * screenSize.width);
       assert(newScale > 1);
       newScale *= imageScale;
       return newScale;
-    } else if(fit == BoxFit.fitWidth && (screenSize.width / screenSize.height > size.width / size.height)){
-      var newScale = screenSize.width / (size.width / size.height * screenSize.height);
+    } else if (fit == BoxFit.fitWidth &&
+        (screenSize.width / screenSize.height > size.width / size.height)) {
+      var newScale =
+          screenSize.width / (size.width / size.height * screenSize.height);
       assert(newScale > 1);
       newScale *= imageScale;
       return newScale;
@@ -457,33 +468,37 @@ class PhotoViewCoreState extends State<PhotoViewCore>
   }
 
   /// callback when loading image completely, update scale using [widget.fit] and image's size.
-  void _onLoadEnd(Size size){
+  void _onLoadEnd(Size size) {
     imageSize = size;
     imageScale = scale;
-    if(widget.hasCustomChild){
+    if (widget.hasCustomChild) {
       return;
     }
     final screenSize = MediaQuery.of(context).size;
-    if(widget.fit == BoxFit.fitHeight && (screenSize.width / screenSize.height < size.width / size.height)){
-      var newScale = screenSize.height / (size.height / size.width * screenSize.width);
+    if (widget.fit == BoxFit.fitHeight &&
+        (screenSize.width / screenSize.height < size.width / size.height)) {
+      var newScale =
+          screenSize.height / (size.height / size.width * screenSize.width);
       assert(newScale > 1);
       newScale *= scale;
       updateScaleStateFromNewScale(newScale);
       updateMultiple(scale: newScale);
-      if(controller is PhotoViewController){
+      if (controller is PhotoViewController) {
         (controller as PhotoViewController).initial = PhotoViewControllerValue(
             position: controller.position,
             scale: newScale,
             rotation: controller.rotation,
             rotationFocusPoint: controller.rotationFocusPoint);
       }
-    } else if(widget.fit == BoxFit.fitWidth && (screenSize.width / screenSize.height > size.width / size.height)){
-      var newScale = screenSize.width / (size.width / size.height * screenSize.height);
+    } else if (widget.fit == BoxFit.fitWidth &&
+        (screenSize.width / screenSize.height > size.width / size.height)) {
+      var newScale =
+          screenSize.width / (size.width / size.height * screenSize.height);
       assert(newScale > 1);
       newScale *= scale;
       updateScaleStateFromNewScale(newScale);
       updateMultiple(scale: newScale);
-      if(controller is PhotoViewController){
+      if (controller is PhotoViewController) {
         (controller as PhotoViewController).initial = PhotoViewControllerValue(
             position: controller.position,
             scale: newScale,
